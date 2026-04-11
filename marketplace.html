@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Markette — Marketplace</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="marketplace.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="goPage('home')">Markette</div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="goPage('home');setActive(this)">Browse</button>
+    <button class="nav-link" onclick="goPage('sell');setActive(this)">Sell</button>
+  </div>
+  <div class="nav-right">
+    <button class="btn btn-ghost btn-sm cart-btn" onclick="goPage('cart')">
+      🛒 Cart <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+    <button class="btn btn-primary btn-sm">Sign in</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <h1>Buy & sell <em>anything,</em><br/>all in one place</h1>
+    <p>Physical goods, services, digital products, and secondhand treasures — Markette has it all.</p>
+    <div class="hero-search">
+      <input type="text" placeholder="Search listings..." id="searchInput" oninput="filterListings()"/>
+      <button class="btn btn-primary" onclick="filterListings()">Search</button>
+    </div>
+    <div class="category-pills">
+      <span class="pill active" onclick="filterByType('all',this)">All</span>
+      <span class="pill physical" onclick="filterByType('physical',this)">📦 Physical</span>
+      <span class="pill services" onclick="filterByType('services',this)">🛠 Services</span>
+      <span class="pill digital" onclick="filterByType('digital',this)">💾 Digital</span>
+      <span class="pill secondhand" onclick="filterByType('secondhand',this)">♻️ Secondhand</span>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <h2>Featured listings</h2>
+      <span style="font-size:0.85rem;color:var(--ink3)" id="listingCount"></span>
+    </div>
+    <div class="grid" id="listingsGrid"></div>
+  </div>
+</div>
+
+<!-- DETAIL PAGE -->
+<div class="page" id="page-detail">
+  <button class="back-btn" onclick="goPage('home')">← Back to listings</button>
+  <div class="detail-layout" id="detailContent"></div>
+</div>
+
+<!-- CART PAGE -->
+<div class="page" id="page-cart">
+  <div class="cart-layout">
+    <h1>Your cart</h1>
+    <div id="cartContent"></div>
+  </div>
+</div>
+
+<!-- SELL PAGE -->
+<div class="page" id="page-sell">
+  <div class="sell-layout">
+    <h1>List something</h1>
+    <p class="sub">Choose a listing type and fill in the details to start selling.</p>
+    <div id="sellForm"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="marketplace.js"></script>
+</body>
+</html>
