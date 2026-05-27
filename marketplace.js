@@ -75,6 +75,7 @@ function renderAuthSlot() {
         </button>
         <div class="store-menu" id="storeMenu">
           <div class="item-muted">${esc(s.email)}</div>
+          <button onclick="goPage('mine');closeStoreMenu()">📋 My listings</button>
           <button onclick="goPage('sell');closeStoreMenu()">📝 List something</button>
           <button onclick="signOut()">↪ Sign out</button>
         </div>
@@ -127,7 +128,7 @@ function signOut() {
 }
 
 function goPage(page) {
-  if (page === 'sell' && !getSeller()) {
+  if ((page === 'sell' || page === 'mine') && !getSeller()) {
     openRegisterModal();
     return;
   }
@@ -136,6 +137,51 @@ function goPage(page) {
   window.scrollTo(0,0);
   if (page === 'cart') renderCart();
   if (page === 'sell') renderSellForm();
+  if (page === 'mine') renderMyListings();
+}
+
+function renderMyListings() {
+  const seller = getSeller();
+  const el = document.getElementById('mineContent');
+  const mine = LISTINGS.filter(l => l.isUserListing && l.seller === seller.storeName);
+  if (mine.length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="emo">📋</div>
+      <p>You haven't published any listings yet.</p>
+      <button class="btn btn-primary" onclick="goPage('sell')">Create your first listing →</button>
+    </div>`;
+    return;
+  }
+  const totalValue = mine.reduce((s,l) => s + (l.price || 0), 0);
+  const joined = seller.joinedAt
+    ? new Date(seller.joinedAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+    : 'Recent';
+  const typeLabel = t => t === 'secondhand' ? '♻️ Secondhand' : t === 'physical' ? '📦 Physical' : t === 'services' ? '🛠 Service' : t === 'restaurant' ? '🍽️ Restaurant' : '💾 Digital';
+  el.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">${mine.length}</div><div class="stat-label">Total listings</div></div>
+      <div class="stat-card"><div class="stat-num">₵${totalValue.toFixed(0)}</div><div class="stat-label">Inventory value</div></div>
+      <div class="stat-card"><div class="stat-num">${esc(joined)}</div><div class="stat-label">Member since</div></div>
+    </div>
+    <div class="mine-list">
+      ${mine.map(l => `
+        <div class="mine-item">
+          <div class="mine-thumb" style="background:${l.bg}">${l.emoji}</div>
+          <div class="mine-info">
+            <div class="mine-title">${esc(l.title)}</div>
+            <div class="mine-sub">
+              <span class="card-type-badge badge-${l.type}">${typeLabel(l.type)}</span>
+              <span>₵${l.price}${l.type === 'services' ? '/hr' : ''}</span>
+            </div>
+          </div>
+          <div class="mine-actions">
+            <button class="mine-action-btn" onclick="showDetail(${l.id})">View</button>
+            <button class="mine-action-btn danger" onclick="deleteListing(${l.id})">✕ Delete</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }
 
 function setActive(el) {
@@ -428,7 +474,11 @@ function deleteListing(id) {
   updateCartBadge();
   showToast('Listing deleted');
   renderListings();
-  goPage('home');
+  if (document.getElementById('page-mine').classList.contains('active')) {
+    renderMyListings();
+  } else {
+    goPage('home');
+  }
 }
 
 function showToast(msg) {
