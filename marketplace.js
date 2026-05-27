@@ -178,7 +178,7 @@ function renderListings() {
         <div class="card-seller">by ${esc(l.seller)}</div>
         ${l.condition ? `<span class="condition-badge">${esc(l.condition)} condition</span>` : ''}
         <div class="card-footer">
-          <span class="card-price">$${l.price}${l.type==='services'?'/hr':''}</span>
+          <span class="card-price">₵${l.price}${l.type==='services'?'/hr':''}</span>
           <span class="card-rating"><span class="star">★</span> ${l.rating}${l.reviews ? ` (${l.reviews})` : ''}</span>
         </div>
       </div>
@@ -210,8 +210,8 @@ function showDetail(id) {
         <span style="font-size:0.85rem;color:var(--ink2)">${l.rating} · ${l.reviews} reviews</span>
       </div>
       <div class="detail-price">
-        $${l.price}${isService ? '/hr' : ''}
-        ${l.originalPrice ? `<span style="font-size:1rem;color:var(--ink3);text-decoration:line-through;margin-left:0.5rem">$${l.originalPrice}</span>
+        ₵${l.price}${isService ? '/hr' : ''}
+        ${l.originalPrice ? `<span style="font-size:1rem;color:var(--ink3);text-decoration:line-through;margin-left:0.5rem">₵${l.originalPrice}</span>
         <span style="font-size:0.9rem;color:var(--green);margin-left:0.5rem">${Math.round((1-l.price/l.originalPrice)*100)}% off</span>` : ''}
       </div>
       <div class="meta-row">
@@ -282,14 +282,14 @@ function renderCart() {
         <div class="cart-item-title">${esc(c.title)}</div>
         <div class="cart-item-sub">${esc(c.seller)} · ${c.type}${c.qty > 1 ? ' · Qty: ' + c.qty : ''}</div>
       </div>
-      <span class="cart-item-price">$${(c.price * c.qty).toFixed(2)}</span>
+      <span class="cart-item-price">₵${(c.price * c.qty).toFixed(2)}</span>
       <button class="remove-btn" onclick="removeFromCart(${c.id})">✕</button>
     </div>
   `).join('') + `
     <div class="cart-summary">
-      <div class="summary-row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
-      ${shipping ? `<div class="summary-row"><span>${feeLabel}</span><span>$${shipping.toFixed(2)}</span></div>` : '<div class="summary-row"><span>Shipping</span><span style="color:var(--green)">Free</span></div>'}
-      <div class="summary-row total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
+      <div class="summary-row"><span>Subtotal</span><span>₵${subtotal.toFixed(2)}</span></div>
+      ${shipping ? `<div class="summary-row"><span>${feeLabel}</span><span>₵${shipping.toFixed(2)}</span></div>` : '<div class="summary-row"><span>Shipping</span><span style="color:var(--green)">Free</span></div>'}
+      <div class="summary-row total"><span>Total</span><span>₵${total.toFixed(2)}</span></div>
       <button class="btn btn-primary btn-large" style="margin-top:1rem;width:100%;justify-content:center" onclick="checkout()">Checkout securely →</button>
     </div>
   `;
@@ -330,7 +330,7 @@ function renderSellForm(success) {
     secondhand: `
       <div class="form-row">
         <div class="form-group"><label>Condition</label><select id="listCondition"><option>Excellent</option><option>Good</option><option>Fair</option></select></div>
-        <div class="form-group"><label>Original RRP ($)</label><input id="listRRP" type="number" placeholder="200"/></div>
+        <div class="form-group"><label>Original RRP (₵)</label><input id="listRRP" type="number" placeholder="200"/></div>
       </div>
       <div class="form-group" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="allowOffers" style="width:auto"/><label for="allowOffers" style="margin:0">Allow buyer offers / negotiation</label></div>`,
     restaurant: `
@@ -354,7 +354,7 @@ function renderSellForm(success) {
     <div class="form-group"><label>Listing title</label><input id="listTitle" type="text" placeholder="e.g. Vintage Leather Jacket — Size M"/></div>
     <div class="form-group"><label>Description</label><textarea id="listDesc" placeholder="Describe your item in detail — condition, features, what's included..."></textarea></div>
     <div class="form-row">
-      <div class="form-group"><label>Price ($)</label><input id="listPrice" type="number" placeholder="29.99" min="0"/></div>
+      <div class="form-group"><label>Price (₵)</label><input id="listPrice" type="number" placeholder="29.99" min="0"/></div>
       <div class="form-group"><label>Category</label><select id="listCategory"><option>Fashion & Apparel</option><option>Electronics</option><option>Home & Garden</option><option>Books & Media</option><option>Design & Creative</option><option>Tech & Software</option><option>Health & Beauty</option><option>Other</option></select></div>
     </div>
     <div class="form-group"><label>Photos (up to 8)</label><input type="file" multiple accept="image/*"/></div>
