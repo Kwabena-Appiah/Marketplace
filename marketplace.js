@@ -23,11 +23,38 @@ let cart = [];
 let activeType = 'all';
 
 const SELLER_KEY = 'markette_seller';
+const USER_LISTINGS_KEY = 'markette_listings';
 function getSeller() {
   try { return JSON.parse(localStorage.getItem(SELLER_KEY) || 'null'); } catch { return null; }
 }
 function saveSeller(s) { localStorage.setItem(SELLER_KEY, JSON.stringify(s)); }
 function clearSeller() { localStorage.removeItem(SELLER_KEY); }
+
+function getUserListings() {
+  try { return JSON.parse(localStorage.getItem(USER_LISTINGS_KEY) || '[]'); } catch { return []; }
+}
+function saveUserListings(arr) { localStorage.setItem(USER_LISTINGS_KEY, JSON.stringify(arr)); }
+
+const TYPE_DEFAULTS = {
+  physical:   { emoji: '🛍️', bg: '#FFF8F0' },
+  services:   { emoji: '✨',  bg: '#F5F0FF' },
+  digital:    { emoji: '⚡',  bg: '#F0FFF5' },
+  secondhand: { emoji: '♻️',  bg: '#FFF5F0' },
+  restaurant: { emoji: '🍴',  bg: '#FFF1EA' },
+};
+const CATEGORY_EMOJI = {
+  'Fashion & Apparel': '👕',
+  'Electronics':       '📱',
+  'Home & Garden':     '🪴',
+  'Books & Media':     '📚',
+  'Design & Creative': '🎨',
+  'Tech & Software':   '💻',
+  'Health & Beauty':   '💄',
+  'Other':             '🎁',
+};
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
 function initialsOf(name) {
   return name.trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase() || '?';
@@ -42,12 +69,12 @@ function renderAuthSlot() {
     slot.innerHTML = `
       <div class="store-wrap">
         <button class="store-chip" onclick="toggleStoreMenu(event)">
-          <span class="avatar">${initialsOf(s.storeName)}</span>
-          <span>${s.storeName}</span>
+          <span class="avatar">${esc(initialsOf(s.storeName))}</span>
+          <span>${esc(s.storeName)}</span>
           <span style="color:var(--ink3);font-size:0.7rem">▾</span>
         </button>
         <div class="store-menu" id="storeMenu">
-          <div class="item-muted">${s.email}</div>
+          <div class="item-muted">${esc(s.email)}</div>
           <button onclick="goPage('sell');closeStoreMenu()">📝 List something</button>
           <button onclick="signOut()">↪ Sign out</button>
         </div>
@@ -136,23 +163,27 @@ function renderListings() {
   });
   const grid = document.getElementById('listingsGrid');
   document.getElementById('listingCount').textContent = items.length + ' listings';
-  grid.innerHTML = items.map(l => `
+  const seller = getSeller();
+  grid.innerHTML = items.map(l => {
+    const isMine = seller && l.isUserListing && l.seller === seller.storeName;
+    return `
     <div class="card" onclick="showDetail(${l.id})">
       <div class="card-img" style="background:${l.bg}">
         <span style="font-size:3.5rem">${l.emoji}</span>
         <span class="card-type-badge badge-${l.type}">${l.type === 'secondhand' ? '♻️ Secondhand' : l.type === 'physical' ? '📦 Physical' : l.type === 'services' ? '🛠 Service' : l.type === 'restaurant' ? '🍽️ Restaurant' : '💾 Digital'}</span>
+        ${isMine ? '<span class="card-mine-badge">Your listing</span>' : ''}
       </div>
       <div class="card-body">
-        <div class="card-title">${l.title}</div>
-        <div class="card-seller">by ${l.seller}</div>
-        ${l.condition ? `<span class="condition-badge">${l.condition} condition</span>` : ''}
+        <div class="card-title">${esc(l.title)}</div>
+        <div class="card-seller">by ${esc(l.seller)}</div>
+        ${l.condition ? `<span class="condition-badge">${esc(l.condition)} condition</span>` : ''}
         <div class="card-footer">
           <span class="card-price">$${l.price}${l.type==='services'?'/hr':''}</span>
-          <span class="card-rating"><span class="star">★</span> ${l.rating} (${l.reviews})</span>
+          <span class="card-rating"><span class="star">★</span> ${l.rating}${l.reviews ? ` (${l.reviews})` : ''}</span>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function showDetail(id) {
@@ -161,16 +192,18 @@ function showDetail(id) {
   const isService = l.type === 'services';
   const isDigital = l.type === 'digital';
   const isRestaurant = l.type === 'restaurant';
+  const seller = getSeller();
+  const isMine = seller && l.isUserListing && l.seller === seller.storeName;
   document.getElementById('detailContent').innerHTML = `
     <div>
       <div class="detail-img" style="background:${l.bg}">${l.emoji}</div>
     </div>
     <div class="detail-info">
       <span class="card-type-badge badge-${l.type}" style="margin-bottom:0.75rem;display:inline-block">${l.type}</span>
-      <h1>${l.title}</h1>
+      <h1>${esc(l.title)}</h1>
       <div class="seller-tag">
-        <div class="seller-avatar">${l.sellerInitials}</div>
-        <span class="seller-name">${l.seller}</span>
+        <div class="seller-avatar">${esc(l.sellerInitials)}</div>
+        <span class="seller-name">${esc(l.seller)}</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
         <span class="stars">${'★'.repeat(Math.floor(l.rating))}${'☆'.repeat(5-Math.floor(l.rating))}</span>
@@ -182,18 +215,23 @@ function showDetail(id) {
         <span style="font-size:0.9rem;color:var(--green);margin-left:0.5rem">${Math.round((1-l.price/l.originalPrice)*100)}% off</span>` : ''}
       </div>
       <div class="meta-row">
-        ${l.tags.map(t => `<span class="meta-item">${t}</span>`).join('')}
-        ${l.condition ? `<span class="meta-item">Condition: ${l.condition}</span>` : ''}
-        ${l.cuisine ? `<span class="meta-item">Cuisine: ${l.cuisine}</span>` : ''}
-        ${l.prepTime ? `<span class="meta-item">⏱ ${l.prepTime}</span>` : ''}
+        ${l.tags.map(t => `<span class="meta-item">${esc(t)}</span>`).join('')}
+        ${l.condition ? `<span class="meta-item">Condition: ${esc(l.condition)}</span>` : ''}
+        ${l.cuisine ? `<span class="meta-item">Cuisine: ${esc(l.cuisine)}</span>` : ''}
+        ${l.prepTime ? `<span class="meta-item">⏱ ${esc(l.prepTime)}</span>` : ''}
       </div>
-      <p class="detail-desc">${l.desc}</p>
+      <p class="detail-desc">${esc(l.desc)}</p>
       <div class="detail-actions">
-        <button class="btn btn-primary btn-large" onclick="addToCart(${l.id})">
-          ${isService ? '📅 Book now' : isDigital ? '⚡ Buy & download' : isRestaurant ? '🍽️ Order now' : '🛒 Add to cart'}
-        </button>
-        <button class="btn-outline" onclick="showToast('Added to wishlist ♡')">♡ Save to wishlist</button>
-        <button class="btn-outline" onclick="showToast('Message sent to ${l.seller}!')">💬 Message seller</button>
+        ${isMine ? `
+          <div class="mine-banner">This is your listing. Buyers see it on the home page.</div>
+          <button class="btn-outline" style="color:#B91C1C;border-color:#FCA5A5" onclick="deleteListing(${l.id})">🗑 Delete listing</button>
+        ` : `
+          <button class="btn btn-primary btn-large" onclick="addToCart(${l.id})">
+            ${isService ? '📅 Book now' : isDigital ? '⚡ Buy & download' : isRestaurant ? '🍽️ Order now' : '🛒 Add to cart'}
+          </button>
+          <button class="btn-outline" onclick="showToast('Added to wishlist ♡')">♡ Save to wishlist</button>
+          <button class="btn-outline" onclick="messageSeller(${l.id})">💬 Message seller</button>
+        `}
       </div>
     </div>
   `;
@@ -241,8 +279,8 @@ function renderCart() {
     <div class="cart-item">
       <div class="cart-item-img" style="background:${c.bg}">${c.emoji}</div>
       <div class="cart-item-info">
-        <div class="cart-item-title">${c.title}</div>
-        <div class="cart-item-sub">${c.seller} · ${c.type}${c.qty > 1 ? ' · Qty: ' + c.qty : ''}</div>
+        <div class="cart-item-title">${esc(c.title)}</div>
+        <div class="cart-item-sub">${esc(c.seller)} · ${c.type}${c.qty > 1 ? ' · Qty: ' + c.qty : ''}</div>
       </div>
       <span class="cart-item-price">$${(c.price * c.qty).toFixed(2)}</span>
       <button class="remove-btn" onclick="removeFromCart(${c.id})">✕</button>
@@ -272,7 +310,7 @@ function renderSellForm(success) {
     return;
   }
   const seller = getSeller();
-  const banner = seller ? `<div class="selling-as">Selling as <strong>${seller.storeName}</strong> · ${seller.email} · Payouts via ${seller.payout}</div>` : '';
+  const banner = seller ? `<div class="selling-as">Selling as <strong>${esc(seller.storeName)}</strong> · ${esc(seller.email)} · Payouts via ${esc(seller.payout)}</div>` : '';
   const typeFields = {
     physical: `
       <div class="form-row">
@@ -291,14 +329,14 @@ function renderSellForm(success) {
       <div class="form-group"><label>Licence type</label><select><option>Personal use</option><option>Commercial use</option><option>Extended commercial</option></select></div>`,
     secondhand: `
       <div class="form-row">
-        <div class="form-group"><label>Condition</label><select><option>Excellent</option><option>Good</option><option>Fair</option></select></div>
-        <div class="form-group"><label>Original RRP ($)</label><input type="number" placeholder="200"/></div>
+        <div class="form-group"><label>Condition</label><select id="listCondition"><option>Excellent</option><option>Good</option><option>Fair</option></select></div>
+        <div class="form-group"><label>Original RRP ($)</label><input id="listRRP" type="number" placeholder="200"/></div>
       </div>
       <div class="form-group" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="allowOffers" style="width:auto"/><label for="allowOffers" style="margin:0">Allow buyer offers / negotiation</label></div>`,
     restaurant: `
       <div class="form-row">
-        <div class="form-group"><label>Cuisine</label><select><option>Ghanaian</option><option>Italian</option><option>Japanese</option><option>Mexican</option><option>American</option><option>Mediterranean</option><option>Chinese</option><option>Indian</option><option>Other</option></select></div>
-        <div class="form-group"><label>Prep time</label><input type="text" placeholder="e.g. 25–35 min"/></div>
+        <div class="form-group"><label>Cuisine</label><select id="listCuisine"><option>Ghanaian</option><option>Italian</option><option>Japanese</option><option>Mexican</option><option>American</option><option>Mediterranean</option><option>Chinese</option><option>Indian</option><option>Other</option></select></div>
+        <div class="form-group"><label>Prep time</label><input id="listPrepTime" type="text" placeholder="e.g. 25–35 min"/></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Order type</label><select><option>Delivery</option><option>Pickup</option><option>Delivery & Pickup</option><option>Dine-in</option></select></div>
@@ -313,11 +351,11 @@ function renderSellForm(success) {
           <div class="emo">${e}</div><div class="name">${n}</div><div class="desc">${d}</div>
         </div>`).join('')}
     </div>
-    <div class="form-group"><label>Listing title</label><input type="text" placeholder="e.g. Vintage Leather Jacket — Size M"/></div>
-    <div class="form-group"><label>Description</label><textarea placeholder="Describe your item in detail — condition, features, what's included..."></textarea></div>
+    <div class="form-group"><label>Listing title</label><input id="listTitle" type="text" placeholder="e.g. Vintage Leather Jacket — Size M"/></div>
+    <div class="form-group"><label>Description</label><textarea id="listDesc" placeholder="Describe your item in detail — condition, features, what's included..."></textarea></div>
     <div class="form-row">
-      <div class="form-group"><label>Price ($)</label><input type="number" placeholder="29.99" min="0"/></div>
-      <div class="form-group"><label>Category</label><select><option>Fashion & Apparel</option><option>Electronics</option><option>Home & Garden</option><option>Books & Media</option><option>Design & Creative</option><option>Tech & Software</option><option>Health & Beauty</option><option>Other</option></select></div>
+      <div class="form-group"><label>Price ($)</label><input id="listPrice" type="number" placeholder="29.99" min="0"/></div>
+      <div class="form-group"><label>Category</label><select id="listCategory"><option>Fashion & Apparel</option><option>Electronics</option><option>Home & Garden</option><option>Books & Media</option><option>Design & Creative</option><option>Tech & Software</option><option>Health & Beauty</option><option>Other</option></select></div>
     </div>
     <div class="form-group"><label>Photos (up to 8)</label><input type="file" multiple accept="image/*"/></div>
     <div id="typeSpecificFields">${typeFields[selectedType]}</div>
@@ -331,7 +369,66 @@ function selectType(t) {
 }
 
 function submitListing() {
+  const seller = getSeller();
+  if (!seller) { openRegisterModal(); return; }
+  const title = document.getElementById('listTitle').value.trim();
+  const desc = document.getElementById('listDesc').value.trim();
+  const price = parseFloat(document.getElementById('listPrice').value);
+  const category = document.getElementById('listCategory').value;
+  if (!title) { showToast('Please enter a listing title'); return; }
+  if (!desc) { showToast('Please add a description'); return; }
+  if (!(price >= 0) || Number.isNaN(price)) { showToast('Please enter a valid price'); return; }
+
+  const emoji = CATEGORY_EMOJI[category] || TYPE_DEFAULTS[selectedType].emoji;
+  const bg = TYPE_DEFAULTS[selectedType].bg;
+  const listing = {
+    id: Date.now(),
+    type: selectedType,
+    emoji, bg, title, desc, price,
+    tags: [category, selectedType === 'restaurant' ? 'Fresh' : 'New'],
+    seller: seller.storeName,
+    sellerInitials: initialsOf(seller.storeName),
+    sellerEmail: seller.email,
+    rating: 5.0,
+    reviews: 0,
+    isUserListing: true,
+    createdAt: Date.now(),
+  };
+  if (selectedType === 'secondhand') {
+    listing.condition = document.getElementById('listCondition')?.value || 'Good';
+    const rrp = parseFloat(document.getElementById('listRRP')?.value);
+    if (rrp && rrp > price) listing.originalPrice = rrp;
+  }
+  if (selectedType === 'restaurant') {
+    const cuisine = document.getElementById('listCuisine')?.value;
+    const prepTime = document.getElementById('listPrepTime')?.value.trim();
+    if (cuisine) listing.cuisine = cuisine;
+    if (prepTime) listing.prepTime = prepTime;
+  }
+
+  const arr = getUserListings();
+  arr.push(listing);
+  saveUserListings(arr);
+  LISTINGS.unshift(listing);
+  renderListings();
   renderSellForm(true);
+}
+
+function messageSeller(id) {
+  const l = LISTINGS.find(x => x.id === id);
+  if (l) showToast(`Message sent to ${l.seller}!`);
+}
+
+function deleteListing(id) {
+  if (!confirm('Delete this listing? This cannot be undone.')) return;
+  saveUserListings(getUserListings().filter(l => l.id !== id));
+  const idx = LISTINGS.findIndex(l => l.id === id);
+  if (idx >= 0) LISTINGS.splice(idx, 1);
+  cart = cart.filter(c => c.id !== id);
+  updateCartBadge();
+  showToast('Listing deleted');
+  renderListings();
+  goPage('home');
 }
 
 function showToast(msg) {
@@ -341,5 +438,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+getUserListings().slice().reverse().forEach(l => LISTINGS.unshift(l));
 renderListings();
 renderAuthSlot();
