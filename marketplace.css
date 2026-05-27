@@ -118,6 +118,25 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2r
 .empty-state .emo{font-size:4rem;margin-bottom:1rem}
 .empty-state p{font-size:1rem;margin-bottom:1.5rem}
 
+/* STORE PAGE */
+.store-layout{max-width:1100px;margin:0 auto;padding:0 2rem 3rem}
+.store-header{display:flex;align-items:center;gap:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.75rem;margin-bottom:1.75rem;flex-wrap:wrap}
+.store-avatar-lg{width:80px;height:80px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.75rem;font-weight:600;font-family:'DM Sans',sans-serif;flex-shrink:0}
+.store-head-info{flex:1;min-width:200px}
+.store-head-info h1{font-size:1.75rem;font-weight:600;letter-spacing:-0.03em;display:flex;align-items:center;gap:0.6rem;margin-bottom:0.25rem;flex-wrap:wrap}
+.store-head-info .your-chip{font-size:0.7rem;font-family:'DM Sans',sans-serif;font-weight:600;background:var(--ink);color:#fff;padding:3px 9px;border-radius:20px;letter-spacing:0.02em}
+.store-bio{font-size:0.95rem;color:var(--ink2);line-height:1.6;margin-bottom:0.5rem}
+.store-stats{display:flex;gap:1.25rem;flex-wrap:wrap;font-size:0.85rem;color:var(--ink2)}
+.store-stats .stat{display:flex;align-items:center;gap:0.3rem}
+.store-section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem}
+.store-section-head h2{font-size:1.25rem;font-weight:500;letter-spacing:-0.02em}
+
+/* SELLER LINK (clickable name on cards / detail) */
+.seller-link{color:inherit;cursor:pointer;border-bottom:1px dashed transparent;transition:all 0.15s}
+.seller-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.seller-tag.clickable{cursor:pointer;transition:background 0.15s,transform 0.15s}
+.seller-tag.clickable:hover{background:var(--surface);outline:1px solid var(--border)}
+
 /* MY LISTINGS */
 .mine-layout{max-width:900px;margin:0 auto;padding:2rem}
 .mine-layout h1{font-size:2rem;font-weight:600;margin-bottom:1.5rem;letter-spacing:-0.03em}

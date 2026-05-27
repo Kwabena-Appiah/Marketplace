@@ -75,6 +75,7 @@ function renderAuthSlot() {
         </button>
         <div class="store-menu" id="storeMenu">
           <div class="item-muted">${esc(s.email)}</div>
+          <button onclick="showStore(${esc(JSON.stringify(s.storeName))});closeStoreMenu()">🏪 View my store</button>
           <button onclick="goPage('mine');closeStoreMenu()">📋 My listings</button>
           <button onclick="goPage('sell');closeStoreMenu()">📝 List something</button>
           <button onclick="signOut()">↪ Sign out</button>
@@ -156,7 +157,6 @@ function renderMyListings() {
   const joined = seller.joinedAt
     ? new Date(seller.joinedAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
     : 'Recent';
-  const typeLabel = t => t === 'secondhand' ? '♻️ Secondhand' : t === 'physical' ? '📦 Physical' : t === 'services' ? '🛠 Service' : t === 'restaurant' ? '🍽️ Restaurant' : '💾 Digital';
   el.innerHTML = `
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-num">${mine.length}</div><div class="stat-label">Total listings</div></div>
@@ -209,19 +209,27 @@ function renderListings() {
   });
   const grid = document.getElementById('listingsGrid');
   document.getElementById('listingCount').textContent = items.length + ' listings';
+  grid.innerHTML = items.map(cardHtml).join('');
+}
+
+function typeLabel(t) {
+  return t === 'secondhand' ? '♻️ Secondhand' : t === 'physical' ? '📦 Physical' : t === 'services' ? '🛠 Service' : t === 'restaurant' ? '🍽️ Restaurant' : '💾 Digital';
+}
+
+function cardHtml(l) {
   const seller = getSeller();
-  grid.innerHTML = items.map(l => {
-    const isMine = seller && l.isUserListing && l.seller === seller.storeName;
-    return `
+  const isMine = seller && l.isUserListing && l.seller === seller.storeName;
+  const sellerArg = esc(JSON.stringify(l.seller));
+  return `
     <div class="card" onclick="showDetail(${l.id})">
       <div class="card-img" style="background:${l.bg}">
         <span style="font-size:3.5rem">${l.emoji}</span>
-        <span class="card-type-badge badge-${l.type}">${l.type === 'secondhand' ? '♻️ Secondhand' : l.type === 'physical' ? '📦 Physical' : l.type === 'services' ? '🛠 Service' : l.type === 'restaurant' ? '🍽️ Restaurant' : '💾 Digital'}</span>
+        <span class="card-type-badge badge-${l.type}">${typeLabel(l.type)}</span>
         ${isMine ? '<span class="card-mine-badge">Your listing</span>' : ''}
       </div>
       <div class="card-body">
         <div class="card-title">${esc(l.title)}</div>
-        <div class="card-seller">by ${esc(l.seller)}</div>
+        <div class="card-seller">by <span class="seller-link" onclick="event.stopPropagation();showStore(${sellerArg})">${esc(l.seller)}</span></div>
         ${l.condition ? `<span class="condition-badge">${esc(l.condition)} condition</span>` : ''}
         <div class="card-footer">
           <span class="card-price">₵${l.price}${l.type==='services'?'/hr':''}</span>
@@ -229,7 +237,60 @@ function renderListings() {
         </div>
       </div>
     </div>`;
-  }).join('');
+}
+
+function showStore(storeName) {
+  const listings = LISTINGS.filter(l => l.seller === storeName);
+  const el = document.getElementById('storeContent');
+  const seller = getSeller();
+  const isMyStore = seller && seller.storeName === storeName;
+  const initials = listings[0]?.sellerInitials || initialsOf(storeName);
+
+  let bio;
+  if (isMyStore) {
+    const catLabel = { physical: 'physical goods', services: 'services', digital: 'digital products', secondhand: 'pre-loved finds', restaurant: 'food & drink' }[seller.category] || 'goods';
+    bio = `Selling ${catLabel} on Markette. Payouts via ${esc(seller.payout)}.`;
+  } else if (listings.length > 0) {
+    const typeCounts = listings.reduce((acc, l) => (acc[l.type] = (acc[l.type] || 0) + 1, acc), {});
+    const topType = Object.entries(typeCounts).sort((a,b) => b[1] - a[1])[0][0];
+    const catLabel = { physical: 'physical goods', services: 'services', digital: 'digital products', secondhand: 'pre-loved finds', restaurant: 'food & drink' }[topType] || 'goods';
+    bio = `Trusted Markette seller specialising in ${catLabel}.`;
+  } else {
+    bio = `${storeName} hasn't published any listings yet.`;
+  }
+
+  const avgRating = listings.length
+    ? (listings.reduce((s,l) => s + (l.rating || 0), 0) / listings.length).toFixed(1)
+    : null;
+  const totalReviews = listings.reduce((s,l) => s + (l.reviews || 0), 0);
+  const joined = isMyStore && seller.joinedAt
+    ? new Date(seller.joinedAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+    : null;
+
+  el.innerHTML = `
+    <div class="store-header">
+      <div class="store-avatar-lg">${esc(initials)}</div>
+      <div class="store-head-info">
+        <h1>${esc(storeName)} ${isMyStore ? '<span class="your-chip">Your store</span>' : ''}</h1>
+        <div class="store-bio">${bio}</div>
+        <div class="store-stats">
+          ${avgRating ? `<div class="stat"><span class="star">★</span> ${avgRating} avg${totalReviews ? ` · ${totalReviews} reviews` : ''}</div>` : ''}
+          <div class="stat">📦 ${listings.length} listing${listings.length === 1 ? '' : 's'}</div>
+          ${joined ? `<div class="stat">📅 Member since ${esc(joined)}</div>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="store-section-head">
+      <h2>${isMyStore ? 'Your listings' : 'Listings'}</h2>
+      ${isMyStore ? `<button class="mine-action-btn" onclick="goPage('mine')">Manage →</button>` : ''}
+    </div>
+    ${listings.length === 0
+      ? `<div class="empty-state"><div class="emo">📭</div><p>No listings yet.</p></div>`
+      : `<div class="grid">${listings.map(cardHtml).join('')}</div>`}
+  `;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-store').classList.add('active');
+  window.scrollTo(0,0);
 }
 
 function showDetail(id) {
@@ -247,7 +308,7 @@ function showDetail(id) {
     <div class="detail-info">
       <span class="card-type-badge badge-${l.type}" style="margin-bottom:0.75rem;display:inline-block">${l.type}</span>
       <h1>${esc(l.title)}</h1>
-      <div class="seller-tag">
+      <div class="seller-tag clickable" onclick="showStore(${esc(JSON.stringify(l.seller))})">
         <div class="seller-avatar">${esc(l.sellerInitials)}</div>
         <span class="seller-name">${esc(l.seller)}</span>
       </div>
