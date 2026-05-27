@@ -11,6 +11,12 @@ const LISTINGS = [
   {id:10,type:'digital',emoji:'🖼️',title:'Social Media Template Pack',seller:'Pixel & Type',sellerInitials:'PT',rating:4.6,reviews:118,price:24,desc:'100 Canva templates for Instagram, Twitter/X, and LinkedIn. Fully editable. 5 colour schemes. Commercial use included. Instant access.',tags:['Canva','Social Media','Templates'],bg:'#FFF8F0'},
   {id:11,type:'services',emoji:'📸',title:'Professional Headshots',seller:'Lens & Light Studio',sellerInitials:'LL',rating:5.0,reviews:56,price:120,desc:'60-minute studio headshot session. 5 edited photos delivered within 48hrs. Accra studio. Online booking available.',tags:['Photography','Headshots','In-person'],bg:'#F5F0FF'},
   {id:12,type:'secondhand',emoji:'🎮',title:'Nintendo Switch + 4 Games',seller:'GamerDad',sellerInitials:'GD',rating:4.8,reviews:3,price:280,originalPrice:450,condition:'Good',desc:'Nintendo Switch V2 with 4 games: Mario Kart 8, Zelda BOTW, Stardew Valley, Hollow Knight. Original box, minor scratch on dock.',tags:['Gaming','Nintendo','Electronics'],bg:'#FFFAEE'},
+  {id:13,type:'restaurant',emoji:'🍛',title:'Waakye Bowl — Auntie Muni',seller:"Muni's Kitchen",sellerInitials:'MK',rating:4.9,reviews:210,price:12,desc:'Classic Ghanaian waakye with shito, gari, boiled egg, and your choice of beef, fish, or chicken. Cooked fresh daily. Delivery within Accra, 25–35 min.',tags:['Ghanaian','Lunch','Delivery'],bg:'#FFF1EA',cuisine:'Ghanaian',prepTime:'25–35 min'},
+  {id:14,type:'restaurant',emoji:'🍕',title:'Margherita Pizza (12")',seller:'Forno Rosso',sellerInitials:'FR',rating:4.7,reviews:88,price:15,desc:'Wood-fired 12" Margherita with San Marzano tomato, fresh mozzarella di bufala, basil, and extra virgin olive oil. Vegetarian.',tags:['Italian','Pizza','Vegetarian'],bg:'#FFF0E8',cuisine:'Italian',prepTime:'20–30 min'},
+  {id:15,type:'restaurant',emoji:'🍣',title:'Salmon Sushi Platter (16pc)',seller:'Sakura Sushi Bar',sellerInitials:'SS',rating:4.8,reviews:142,price:32,desc:'16-piece salmon platter: 8 nigiri, 8 maki rolls. Served with wasabi, pickled ginger, and soy sauce. Pickup or delivery.',tags:['Japanese','Sushi','Fresh'],bg:'#FFF5F8',cuisine:'Japanese',prepTime:'30–40 min'},
+  {id:16,type:'restaurant',emoji:'🌮',title:'Taco Trio + Guac',seller:'Casa Maya',sellerInitials:'CM',rating:4.6,reviews:64,price:14,desc:'Three soft corn tortilla tacos — al pastor, carnitas, and grilled veg — with a side of fresh guacamole and tortilla chips. Spicy on request.',tags:['Mexican','Tacos','Dinner'],bg:'#FFF8E8',cuisine:'Mexican',prepTime:'15–25 min'},
+  {id:17,type:'restaurant',emoji:'🍔',title:'Smash Burger Combo',seller:'Burger Loft',sellerInitials:'BL',rating:4.7,reviews:175,price:18,desc:'Double smash patty with American cheese, pickles, onion, and house sauce on a brioche bun. Comes with crinkle fries and a soft drink.',tags:['American','Burger','Combo'],bg:'#FFF6E8',cuisine:'American',prepTime:'15–20 min'},
+  {id:18,type:'restaurant',emoji:'🥗',title:'Mediterranean Power Bowl',seller:'Olive & Grain',sellerInitials:'OG',rating:4.8,reviews:96,price:13,desc:'Quinoa, roasted chickpeas, falafel, cucumber, tomato, feta, olives, and lemon-tahini dressing. Vegetarian. Vegan option available.',tags:['Healthy','Mediterranean','Vegetarian'],bg:'#F0FAE8',cuisine:'Mediterranean',prepTime:'10–15 min'},
 ];
 
 let cart = [];
@@ -53,7 +59,7 @@ function renderListings() {
     <div class="card" onclick="showDetail(${l.id})">
       <div class="card-img" style="background:${l.bg}">
         <span style="font-size:3.5rem">${l.emoji}</span>
-        <span class="card-type-badge badge-${l.type}">${l.type === 'secondhand' ? '♻️ Secondhand' : l.type === 'physical' ? '📦 Physical' : l.type === 'services' ? '🛠 Service' : '💾 Digital'}</span>
+        <span class="card-type-badge badge-${l.type}">${l.type === 'secondhand' ? '♻️ Secondhand' : l.type === 'physical' ? '📦 Physical' : l.type === 'services' ? '🛠 Service' : l.type === 'restaurant' ? '🍽️ Restaurant' : '💾 Digital'}</span>
       </div>
       <div class="card-body">
         <div class="card-title">${l.title}</div>
@@ -73,6 +79,7 @@ function showDetail(id) {
   if (!l) return;
   const isService = l.type === 'services';
   const isDigital = l.type === 'digital';
+  const isRestaurant = l.type === 'restaurant';
   document.getElementById('detailContent').innerHTML = `
     <div>
       <div class="detail-img" style="background:${l.bg}">${l.emoji}</div>
@@ -96,11 +103,13 @@ function showDetail(id) {
       <div class="meta-row">
         ${l.tags.map(t => `<span class="meta-item">${t}</span>`).join('')}
         ${l.condition ? `<span class="meta-item">Condition: ${l.condition}</span>` : ''}
+        ${l.cuisine ? `<span class="meta-item">Cuisine: ${l.cuisine}</span>` : ''}
+        ${l.prepTime ? `<span class="meta-item">⏱ ${l.prepTime}</span>` : ''}
       </div>
       <p class="detail-desc">${l.desc}</p>
       <div class="detail-actions">
         <button class="btn btn-primary btn-large" onclick="addToCart(${l.id})">
-          ${isService ? '📅 Book now' : isDigital ? '⚡ Buy & download' : '🛒 Add to cart'}
+          ${isService ? '📅 Book now' : isDigital ? '⚡ Buy & download' : isRestaurant ? '🍽️ Order now' : '🛒 Add to cart'}
         </button>
         <button class="btn-outline" onclick="showToast('Added to wishlist ♡')">♡ Save to wishlist</button>
         <button class="btn-outline" onclick="showToast('Message sent to ${l.seller}!')">💬 Message seller</button>
@@ -121,7 +130,7 @@ function addToCart(id) {
     cart.push({...l, qty: 1});
   }
   updateCartBadge();
-  showToast(l.type === 'services' ? `Booking slot reserved for "${l.title}"` : l.type === 'digital' ? `"${l.title}" ready to download after checkout` : `"${l.title}" added to cart`);
+  showToast(l.type === 'services' ? `Booking slot reserved for "${l.title}"` : l.type === 'digital' ? `"${l.title}" ready to download after checkout` : l.type === 'restaurant' ? `"${l.title}" added to your order 🍽️` : `"${l.title}" added to cart`);
 }
 
 function updateCartBadge() {
@@ -142,7 +151,10 @@ function renderCart() {
     return;
   }
   const subtotal = cart.reduce((s,c) => s + c.price * c.qty, 0);
-  const shipping = cart.some(c => c.type === 'physical' || c.type === 'secondhand') ? 8 : 0;
+  const hasShipped = cart.some(c => c.type === 'physical' || c.type === 'secondhand');
+  const hasRestaurant = cart.some(c => c.type === 'restaurant');
+  const shipping = (hasShipped ? 8 : 0) + (hasRestaurant ? 4 : 0);
+  const feeLabel = hasShipped && hasRestaurant ? 'Shipping + delivery' : hasRestaurant ? 'Delivery' : 'Shipping';
   const total = subtotal + shipping;
   el.innerHTML = cart.map(c => `
     <div class="cart-item">
@@ -157,7 +169,7 @@ function renderCart() {
   `).join('') + `
     <div class="cart-summary">
       <div class="summary-row"><span>Subtotal</span><span>$${subtotal.toFixed(2)}</span></div>
-      ${shipping ? `<div class="summary-row"><span>Shipping</span><span>$${shipping.toFixed(2)}</span></div>` : '<div class="summary-row"><span>Shipping</span><span style="color:var(--green)">Free</span></div>'}
+      ${shipping ? `<div class="summary-row"><span>${feeLabel}</span><span>$${shipping.toFixed(2)}</span></div>` : '<div class="summary-row"><span>Shipping</span><span style="color:var(--green)">Free</span></div>'}
       <div class="summary-row total"><span>Total</span><span>$${total.toFixed(2)}</span></div>
       <button class="btn btn-primary btn-large" style="margin-top:1rem;width:100%;justify-content:center" onclick="checkout()">Checkout securely →</button>
     </div>
@@ -199,11 +211,20 @@ function renderSellForm(success) {
         <div class="form-group"><label>Condition</label><select><option>Excellent</option><option>Good</option><option>Fair</option></select></div>
         <div class="form-group"><label>Original RRP ($)</label><input type="number" placeholder="200"/></div>
       </div>
-      <div class="form-group" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="allowOffers" style="width:auto"/><label for="allowOffers" style="margin:0">Allow buyer offers / negotiation</label></div>`
+      <div class="form-group" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="allowOffers" style="width:auto"/><label for="allowOffers" style="margin:0">Allow buyer offers / negotiation</label></div>`,
+    restaurant: `
+      <div class="form-row">
+        <div class="form-group"><label>Cuisine</label><select><option>Ghanaian</option><option>Italian</option><option>Japanese</option><option>Mexican</option><option>American</option><option>Mediterranean</option><option>Chinese</option><option>Indian</option><option>Other</option></select></div>
+        <div class="form-group"><label>Prep time</label><input type="text" placeholder="e.g. 25–35 min"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Order type</label><select><option>Delivery</option><option>Pickup</option><option>Delivery & Pickup</option><option>Dine-in</option></select></div>
+        <div class="form-group"><label>Dietary tags</label><input type="text" placeholder="e.g. Vegan, Halal, Gluten-free"/></div>
+      </div>`
   };
   el.innerHTML = `
     <div class="type-grid">
-      ${[['physical','📦','Physical good','Tangible shipped item'],['services','🛠','Service','Book a time slot'],['digital','💾','Digital product','Instant download'],['secondhand','♻️','Secondhand item','Pre-loved item']].map(([t,e,n,d]) => `
+      ${[['physical','📦','Physical good','Tangible shipped item'],['services','🛠','Service','Book a time slot'],['digital','💾','Digital product','Instant download'],['secondhand','♻️','Secondhand item','Pre-loved item'],['restaurant','🍽️','Restaurant','Food, delivery or pickup']].map(([t,e,n,d]) => `
         <div class="type-option ${selectedType===t?'selected':''}" onclick="selectType('${t}')">
           <div class="emo">${e}</div><div class="name">${n}</div><div class="desc">${d}</div>
         </div>`).join('')}

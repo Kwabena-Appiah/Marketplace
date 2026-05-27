@@ -53,6 +53,7 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2r
 .pill.services{--pc:#6B3FA0}.pill.services:hover,.pill.services.active{background:#6B3FA0;border-color:#6B3FA0;color:#fff}
 .pill.digital{--pc:#2A6B4A}.pill.digital:hover,.pill.digital.active{background:var(--green);border-color:var(--green);color:#fff}
 .pill.secondhand{--pc:#C8470A}.pill.secondhand:hover,.pill.secondhand.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.pill.restaurant{--pc:#B91C1C}.pill.restaurant:hover,.pill.restaurant.active{background:#B91C1C;border-color:#B91C1C;color:#fff}
 
 /* LISTINGS GRID */
 .section{padding:1.5rem 2rem 3rem;max-width:1200px;margin:0 auto}
@@ -69,6 +70,7 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2r
 .badge-services{background:#EDE9FE;color:#5B21B6}
 .badge-digital{background:#D1FAE5;color:#065F46}
 .badge-secondhand{background:#FFEDD5;color:#9A3412}
+.badge-restaurant{background:#FEE2E2;color:#991B1B}
 .card-body{padding:1rem}
 .card-title{font-weight:600;font-size:0.95rem;margin-bottom:0.3rem;line-height:1.4}
 .card-seller{font-size:0.8rem;color:var(--ink3);margin-bottom:0.5rem}
@@ -123,7 +125,7 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2r
 .form-group input,.form-group textarea,.form-group select{width:100%;padding:0.75rem 1rem;border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.95rem;background:var(--surface);color:var(--ink);outline:none;transition:border 0.15s}
 .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent)}
 .form-group textarea{resize:vertical;min-height:100px}
-.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-bottom:1.5rem}
+.type-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:1.5rem}
 .type-option{border:1.5px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;transition:all 0.15s;text-align:center;background:var(--surface)}
 .type-option:hover{border-color:var(--accent);background:#FFF8F5}
 .type-option.selected{border-color:var(--accent);background:#FFF1EA}
