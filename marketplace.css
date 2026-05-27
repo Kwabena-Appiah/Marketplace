@@ -138,6 +138,34 @@ nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2r
 .success-state h2{font-size:1.5rem;margin-bottom:0.5rem}
 .success-state p{color:var(--ink2);margin-bottom:1.5rem}
 
+/* MODAL */
+.modal-backdrop{position:fixed;inset:0;background:rgba(26,23,20,0.45);display:none;align-items:center;justify-content:center;z-index:1000;padding:1rem;animation:fadeIn 0.2s ease}
+.modal-backdrop.show{display:flex}
+.modal{background:var(--surface);border-radius:16px;padding:2rem;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(26,23,20,0.25);position:relative;max-height:90vh;overflow-y:auto;animation:modalIn 0.25s ease}
+.modal h2{font-size:1.5rem;font-weight:600;letter-spacing:-0.03em;margin-bottom:0.4rem}
+.modal-sub{font-size:0.9rem;color:var(--ink2);margin-bottom:1.5rem}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.1rem;color:var(--ink3);cursor:pointer;width:32px;height:32px;border-radius:8px;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--tag-bg);color:var(--ink)}
+.modal-actions{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.5rem}
+.modal-actions .btn-outline,.modal-actions .btn{width:auto;padding:0.7rem 1.25rem;font-size:0.875rem}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* STORE CHIP (nav) */
+.store-chip{display:inline-flex;align-items:center;gap:6px;background:var(--tag-bg);border:1px solid var(--border);border-radius:20px;padding:4px 10px 4px 4px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;color:var(--ink);transition:all 0.15s}
+.store-chip:hover{background:var(--surface);border-color:var(--ink2)}
+.store-chip .avatar{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.store-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:0.4rem;min-width:180px;display:none;z-index:50}
+.store-menu.show{display:block}
+.store-menu button{background:none;border:none;width:100%;text-align:left;padding:0.5rem 0.75rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--ink);cursor:pointer;transition:background 0.15s}
+.store-menu button:hover{background:var(--tag-bg)}
+.store-menu .item-muted{color:var(--ink3);font-size:0.75rem;padding:0.4rem 0.75rem;pointer-events:none}
+.store-wrap{position:relative}
+
+/* SELLING-AS BANNER */
+.selling-as{display:flex;align-items:center;gap:0.6rem;background:#FFF8F0;border:1px solid var(--accent2);border-radius:10px;padding:0.7rem 1rem;margin-bottom:1.5rem;font-size:0.875rem;color:var(--ink)}
+.selling-as strong{font-weight:600}
+
 /* TOAST */
 .toast{position:fixed;bottom:2rem;right:2rem;background:var(--ink);color:#fff;padding:0.875rem 1.5rem;border-radius:12px;font-size:0.875rem;font-weight:500;transform:translateY(80px);opacity:0;transition:all 0.3s;z-index:999;max-width:320px}
 .toast.show{transform:translateY(0);opacity:1}

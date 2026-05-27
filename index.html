@@ -19,7 +19,7 @@
     <button class="btn btn-ghost btn-sm cart-btn" onclick="goPage('cart')">
       🛒 Cart <span class="cart-badge" id="cartBadge">0</span>
     </button>
-    <button class="btn btn-primary btn-sm">Sign in</button>
+    <div id="authSlot"></div>
   </div>
 </nav>
 
@@ -70,6 +70,37 @@
     <h1>List something</h1>
     <p class="sub">Choose a listing type and fill in the details to start selling.</p>
     <div id="sellForm"></div>
+  </div>
+</div>
+
+<!-- REGISTER MODAL -->
+<div class="modal-backdrop" id="registerModal" onclick="closeRegisterIfBackdrop(event)">
+  <div class="modal" role="dialog" aria-labelledby="registerTitle">
+    <button class="modal-close" onclick="closeRegisterModal()" aria-label="Close">✕</button>
+    <h2 id="registerTitle">Open your store</h2>
+    <p class="modal-sub">Set up a seller profile to start listing items on Markette.</p>
+    <div class="form-group"><label>Store name</label><input type="text" id="regStoreName" placeholder="e.g. Amara Studio"/></div>
+    <div class="form-group"><label>Contact email</label><input type="email" id="regEmail" placeholder="you@example.com"/></div>
+    <div class="form-row">
+      <div class="form-group"><label>What do you sell?</label><select id="regCategory">
+        <option value="physical">📦 Physical goods</option>
+        <option value="services">🛠 Services</option>
+        <option value="digital">💾 Digital products</option>
+        <option value="secondhand">♻️ Secondhand items</option>
+        <option value="restaurant">🍽️ Restaurant / Food</option>
+      </select></div>
+      <div class="form-group"><label>Payout method</label><select id="regPayout">
+        <option>Bank transfer</option>
+        <option>Mobile Money (MTN)</option>
+        <option>Mobile Money (Vodafone)</option>
+        <option>PayPal</option>
+        <option>Stripe</option>
+      </select></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeRegisterModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitRegister()">Create store →</button>
+    </div>
   </div>
 </div>
 

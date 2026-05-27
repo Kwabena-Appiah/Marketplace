@@ -22,7 +22,88 @@ const LISTINGS = [
 let cart = [];
 let activeType = 'all';
 
+const SELLER_KEY = 'markette_seller';
+function getSeller() {
+  try { return JSON.parse(localStorage.getItem(SELLER_KEY) || 'null'); } catch { return null; }
+}
+function saveSeller(s) { localStorage.setItem(SELLER_KEY, JSON.stringify(s)); }
+function clearSeller() { localStorage.removeItem(SELLER_KEY); }
+
+function initialsOf(name) {
+  return name.trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase() || '?';
+}
+
+function renderAuthSlot() {
+  const slot = document.getElementById('authSlot');
+  const s = getSeller();
+  if (!s) {
+    slot.innerHTML = `<button class="btn btn-primary btn-sm" onclick="openRegisterModal()">Sign in</button>`;
+  } else {
+    slot.innerHTML = `
+      <div class="store-wrap">
+        <button class="store-chip" onclick="toggleStoreMenu(event)">
+          <span class="avatar">${initialsOf(s.storeName)}</span>
+          <span>${s.storeName}</span>
+          <span style="color:var(--ink3);font-size:0.7rem">▾</span>
+        </button>
+        <div class="store-menu" id="storeMenu">
+          <div class="item-muted">${s.email}</div>
+          <button onclick="goPage('sell');closeStoreMenu()">📝 List something</button>
+          <button onclick="signOut()">↪ Sign out</button>
+        </div>
+      </div>`;
+  }
+}
+
+function toggleStoreMenu(e) {
+  e.stopPropagation();
+  document.getElementById('storeMenu').classList.toggle('show');
+}
+function closeStoreMenu() {
+  const m = document.getElementById('storeMenu');
+  if (m) m.classList.remove('show');
+}
+document.addEventListener('click', closeStoreMenu);
+
+function openRegisterModal() {
+  document.getElementById('registerModal').classList.add('show');
+  setTimeout(() => document.getElementById('regStoreName').focus(), 50);
+}
+function closeRegisterModal() {
+  document.getElementById('registerModal').classList.remove('show');
+}
+function closeRegisterIfBackdrop(e) {
+  if (e.target.id === 'registerModal') closeRegisterModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRegisterModal(); });
+
+function submitRegister() {
+  const storeName = document.getElementById('regStoreName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const category = document.getElementById('regCategory').value;
+  const payout = document.getElementById('regPayout').value;
+  if (!storeName) { showToast('Please enter a store name'); return; }
+  if (!email || !email.includes('@')) { showToast('Please enter a valid email'); return; }
+  saveSeller({ storeName, email, category, payout, joinedAt: Date.now() });
+  closeRegisterModal();
+  renderAuthSlot();
+  showToast(`Welcome to Markette, ${storeName}! 🎉`);
+  goPage('sell');
+}
+
+function signOut() {
+  clearSeller();
+  closeStoreMenu();
+  renderAuthSlot();
+  showToast('Signed out');
+  goPage('home');
+}
+
 function goPage(page) {
+  if (page === 'sell' && !getSeller()) {
+    openRegisterModal();
+    return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   window.scrollTo(0,0);
@@ -183,13 +264,15 @@ function checkout() {
   goPage('home');
 }
 
-let selectedType = 'physical';
+let selectedType = (getSeller() && getSeller().category) || 'physical';
 function renderSellForm(success) {
   const el = document.getElementById('sellForm');
   if (success) {
     el.innerHTML = `<div class="success-state"><div class="emo">🎉</div><h2>Listing published!</h2><p>Your item is now live on Markette.</p><button class="btn btn-primary" onclick="goPage('home')">Browse listings</button></div>`;
     return;
   }
+  const seller = getSeller();
+  const banner = seller ? `<div class="selling-as">Selling as <strong>${seller.storeName}</strong> · ${seller.email} · Payouts via ${seller.payout}</div>` : '';
   const typeFields = {
     physical: `
       <div class="form-row">
@@ -223,6 +306,7 @@ function renderSellForm(success) {
       </div>`
   };
   el.innerHTML = `
+    ${banner}
     <div class="type-grid">
       ${[['physical','📦','Physical good','Tangible shipped item'],['services','🛠','Service','Book a time slot'],['digital','💾','Digital product','Instant download'],['secondhand','♻️','Secondhand item','Pre-loved item'],['restaurant','🍽️','Restaurant','Food, delivery or pickup']].map(([t,e,n,d]) => `
         <div class="type-option ${selectedType===t?'selected':''}" onclick="selectType('${t}')">
@@ -258,3 +342,4 @@ function showToast(msg) {
 }
 
 renderListings();
+renderAuthSlot();
