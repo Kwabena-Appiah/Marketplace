@@ -19,6 +19,27 @@ const LISTINGS = [
   {id:18,type:'restaurant',emoji:'🥗',title:'Mediterranean Power Bowl',seller:'Olive & Grain',sellerInitials:'OG',rating:4.8,reviews:96,price:13,desc:'Quinoa, roasted chickpeas, falafel, cucumber, tomato, feta, olives, and lemon-tahini dressing. Vegetarian. Vegan option available.',tags:['Healthy','Mediterranean','Vegetarian'],bg:'#F0FAE8',cuisine:'Mediterranean',prepTime:'10–15 min'},
 ];
 
+const SELLER_PROFILES = {
+  'Amara Studio':       { joinedAt: Date.parse('2023-01-15'), bio: 'Handcrafted full-grain leather goods, made to last decades. Based in Accra.' },
+  'Kojo Creative':      { joinedAt: Date.parse('2023-03-08'), bio: 'Brand identity and visual design studio for founders launching new ventures.' },
+  'FinanceKit':         { joinedAt: Date.parse('2022-09-21'), bio: 'Spreadsheet templates for founders. Used by 500+ startups.' },
+  'PhotoGeek GH':       { joinedAt: Date.parse('2023-07-04'), bio: 'Pre-loved camera gear, tested and verified by working photographers.' },
+  'Esi Botanics':       { joinedAt: Date.parse('2023-02-19'), bio: 'Small-batch botanical candles and home fragrance, hand-poured in Tema.' },
+  'Kwame Dev':          { joinedAt: Date.parse('2022-11-12'), bio: 'Senior React developer with 8 years building dashboards and e-commerce platforms.' },
+  'BeatsByOsei':        { joinedAt: Date.parse('2023-04-30'), bio: 'Producer crafting lo-fi, hip-hop, and Afrobeat samples for creators.' },
+  'Abena Reads':        { joinedAt: Date.parse('2023-08-17'), bio: 'Curated design and architecture book collections from estate sales.' },
+  'GreenThumb Gh':      { joinedAt: Date.parse('2023-05-09'), bio: 'Indoor plants grown locally in Accra. Care guidance included with every plant.' },
+  'Pixel & Type':       { joinedAt: Date.parse('2022-10-03'), bio: 'Canva, Notion, and Figma templates for solo founders. Ships same day.' },
+  'Lens & Light Studio':{ joinedAt: Date.parse('2023-06-22'), bio: 'Headshots and brand photography in our East Legon studio.' },
+  'GamerDad':           { joinedAt: Date.parse('2023-09-14'), bio: 'Pre-loved games and consoles. Everything tested, cleaned, and fairly priced.' },
+  "Muni's Kitchen":     { joinedAt: Date.parse('2024-01-08'), bio: "Home-style Ghanaian cooking, fresh daily. Auntie Muni's family recipes." },
+  'Forno Rosso':        { joinedAt: Date.parse('2024-02-20'), bio: 'Neapolitan wood-fired pizza with imported flour and a real wood oven.' },
+  'Sakura Sushi Bar':   { joinedAt: Date.parse('2024-03-11'), bio: 'Fresh sushi by trained itamae. Fish sourced daily.' },
+  'Casa Maya':          { joinedAt: Date.parse('2024-05-04'), bio: 'Mexican street food with hand-pressed tortillas and house salsas.' },
+  'Burger Loft':        { joinedAt: Date.parse('2024-04-18'), bio: 'Smash burgers, hand-cut fries, and milkshakes. Late-night kitchen.' },
+  'Olive & Grain':      { joinedAt: Date.parse('2024-06-25'), bio: 'Mediterranean bowls with locally sourced veg and house dressings.' },
+};
+
 let cart = [];
 let activeType = 'all';
 
@@ -246,25 +267,29 @@ function showStore(storeName) {
   const isMyStore = seller && seller.storeName === storeName;
   const initials = listings[0]?.sellerInitials || initialsOf(storeName);
 
+  const seedProfile = !isMyStore ? SELLER_PROFILES[storeName] : null;
   let bio;
   if (isMyStore) {
     const catLabel = { physical: 'physical goods', services: 'services', digital: 'digital products', secondhand: 'pre-loved finds', restaurant: 'food & drink' }[seller.category] || 'goods';
     bio = `Selling ${catLabel} on Markette. Payouts via ${esc(seller.payout)}.`;
+  } else if (seedProfile) {
+    bio = esc(seedProfile.bio);
   } else if (listings.length > 0) {
     const typeCounts = listings.reduce((acc, l) => (acc[l.type] = (acc[l.type] || 0) + 1, acc), {});
     const topType = Object.entries(typeCounts).sort((a,b) => b[1] - a[1])[0][0];
     const catLabel = { physical: 'physical goods', services: 'services', digital: 'digital products', secondhand: 'pre-loved finds', restaurant: 'food & drink' }[topType] || 'goods';
     bio = `Trusted Markette seller specialising in ${catLabel}.`;
   } else {
-    bio = `${storeName} hasn't published any listings yet.`;
+    bio = `${esc(storeName)} hasn't published any listings yet.`;
   }
 
   const avgRating = listings.length
     ? (listings.reduce((s,l) => s + (l.rating || 0), 0) / listings.length).toFixed(1)
     : null;
   const totalReviews = listings.reduce((s,l) => s + (l.reviews || 0), 0);
-  const joined = isMyStore && seller.joinedAt
-    ? new Date(seller.joinedAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+  const joinedTs = isMyStore ? seller.joinedAt : seedProfile?.joinedAt;
+  const joined = joinedTs
+    ? new Date(joinedTs).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
     : null;
 
   el.innerHTML = `
